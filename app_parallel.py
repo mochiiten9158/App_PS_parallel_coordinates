@@ -50,7 +50,7 @@ STAT_COLORS = {
 def build_image_index(img_dir):
     """
     Maps realized correlation -> image basename
-    scatter_bw_70_0.58_p.png → 0.58
+    parallel_bw_70_0.58_p.png → 0.58
     """
     index = []
 
@@ -75,7 +75,7 @@ def closest_image(target_corr, image_index):
 
 def target_corr_from_stats(fname):
     """
-    stats_corr_scatter_bw_70_0.000_z.txt → 0.000
+    stats_corr_parallel_bw_70_0.000_z.txt → 0.000
     """
     parts = fname.replace(".txt", "").split("_")
     return float(parts[-2])
@@ -83,7 +83,7 @@ def target_corr_from_stats(fname):
 def corr_from_filename(fname):
     """
     Extract correlation from:
-    statistics_scatter_bw_8_-0.50_n.txt  →  -0.50
+    statistics_parallel_bw_8_-0.50_n.txt  →  -0.50
     """
     base = os.path.basename(fname)
     stem = base.replace("statistics_", "").replace(".txt", "")
@@ -467,7 +467,7 @@ def update_embedding(selected_images, enabled_stats, topk_value, _):
     print(f"Computing UMAP for {X.shape[0]} images using top {topk_value} features...")
     print(f"Computing UMAP for {X.shape[0]} images with {len(enabled_stats)} statistic groups...")
 
-    Xu = umap.UMAP(n_neighbors=5, min_dist=0.3, random_state=0, n_epochs=500, init="spectral").fit_transform(X)
+    Xu = umap.UMAP(n_neighbors=5, min_dist=0.3, random_state=0, n_epochs=500, init="spectral", n_jobs = 1).fit_transform(X)
     df = pd.DataFrame({
         "x": Xu[:, 0],
         "y": Xu[:, 1],
@@ -529,4 +529,5 @@ def update_images(hoverData):
     return orig, out
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 8050))
+    app.run(host="0.0.0.0", port=port, debug=False)
