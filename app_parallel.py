@@ -458,11 +458,26 @@ def update_embedding(selected_images, enabled_stats, topk_value, _):
 
     topk_value = min(max(1, topk_value), X_final.shape[1])
 
-    top_features = df_features.head(topk_value)
-    top_indices = [FEATURE_NAMES.index(f) for f in top_features["feature"]]
+    # 1. Filter features by selected statistic groups
+    filtered_features = df_features[
+        df_features["group"].isin(enabled_stats)
+    ]
+
+    # 2. Apply Top-K AFTER group filtering
+    top_features = filtered_features.head(topk_value)
+
+    # 3. Convert to column indices
+    top_indices = [
+        FEATURE_NAMES.index(f)
+        for f in top_features["feature"]
+    ]
 
     # X = StandardScaler().fit_transform(X_pca_top[mask])
     X = X_final[mask][:, top_indices]  # Already scaled
+
+    print("Enabled statistic groups:", enabled_stats)
+    print("Using feature groups:", top_features["group"].unique())
+    print("Total features used:", len(top_indices))
 
     print(f"Computing UMAP for {X.shape[0]} images using top {topk_value} features...")
     print(f"Computing UMAP for {X.shape[0]} images with {len(enabled_stats)} statistic groups...")
